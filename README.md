@@ -10,6 +10,6 @@ Add this plugin by adding it to `Gemfile.plugins`, e.g.:
 
 If the plugin has been enabled you will have a new link that reads 'Mock Auth' on the OpenProject login page and in the drop down menu.
 
-*Note*
+**Note**
 
 The way authentication plugins render their login links is subject to change.
