@@ -1,40 +1,44 @@
+require 'securerandom'
+
 module OmniAuth
   module Strategies
     ##
-    # Mock authentication strategy. Logs in a user given their email address.
+    # The mock authentication strategy simply shows a form where you provide the user info.
+    # Users are identified by their email address. I.e. when you want to login with a user you created
+    # before using the mock auth strategy, you just have to provide the same email address in the form.
     class MockAuth
       include OmniAuth::Strategy
 
-      option :fields, [:email]
+      option :uid_field, :email
+      option :fields, [:name, :email]
 
       def request_phase
+        csrf_token = SecureRandom.base64(32)
+        request.session[:_csrf_token] = csrf_token
+
         form = OmniAuth::Form.new(title: 'Mock Auth', url: callback_path)
         options.fields.each do |field|
           form.text_field field.to_s.capitalize.gsub('_', ' '), field.to_s
         end
+        form.html "<input type=\"hidden\" name=\"authenticity_token\" value=\"#{csrf_token}\"/>"
         form.button 'Sign In'
         form.to_response
       end
 
-      def callback_phase
-        user = User.find_by_mail(info[:email])
-        request.session[:user_id] = user.id
-        redirect_to("/")
+      # required to identify the user in OpenProject
+      uid do
+        info[options.uid_field]
       end
 
+      # required user info used in OpenProject
       info do
-        options.fields.each_with_object({}) do |field, hash|
-          hash[field] = request.params[field.to_s]
-          hash
-        end
-      end
-
-      private
-
-      def redirect_to(url)
-        res = Rack::Response.new
-        res.redirect url
-        res.finish
+        name = request.params['name']
+        {
+          name: name,
+          email: request.params['email'],
+          first_name: name.split(/\s/).first,
+          last_name: name.split(/\s/).last,
+        }
       end
     end
   end
