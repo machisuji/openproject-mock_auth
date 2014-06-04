@@ -1,4 +1,5 @@
 require 'securerandom'
+require 'omniauth/strategy'
 
 module OmniAuth
   module Strategies
