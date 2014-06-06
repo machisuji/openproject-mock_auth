@@ -16,7 +16,7 @@ module OpenProject::MockAuth
 
     register_auth_providers do
       strategy :mock_auth do
-        [{name: 'mock_auth'}]
+        [{name: 'mock_auth', display_name: 'Test'}]
       end
     end
   end
